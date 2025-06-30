@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<div class="container mt-5">
+    <h2>Your Dashboard</h2>
+    <hr>
+    <h4>Your Uploaded Resumes & Matches</h4>
+    <ul class="list-group">
+        {% for resume, matches in resume_matches %}
+            <li class="list-group-item">
+                {{ resume.uploaded_at }} - 
+                {% if resume.file %}
+                    <a href="{{ resume.file.url }}" target="_blank">Download</a>
+                {% else %}
+                    No file uploaded
+                {% endif %}
+                {% if resume.skills %}
+                    <div class="mt-2">
+                        <strong>Extracted Skills:</strong>
+                        <span>{{ resume.skills }}</span>
+                    </div>
+                {% endif %}
+                {% if resume.parsed_text %}
+                    <div class="mt-2">
+                        <strong>Extracted Text:</strong>
+                        <pre style="white-space: pre-wrap;">{{ resume.parsed_text|truncatechars:1000 }}</pre>
+                    </div>
+                {% endif %}
+                {% if matches %}
+                    <div class="mt-2">
+                        <strong>Top Job Matches (TF-IDF + Skills):</strong>
+                        <ul class="list-group mt-2">
+                            {% for match in matches %}
+                                <li class="list-group-item">
+                                    <strong>{{ match.job.title }}</strong> at {{ match.job.company }}<br>
+                                    <em>TF-IDF Score:</em> {{ match.tfidf_score }}<br>
+                                    <em>Skill Match Score:</em> {{ match.skill_score }}<br>
+                                    {% if match.matched_skills %}
+                                        <em>Matched Skills:</em> {{ match.matched_skills|join:", " }}<br>
+                                    {% endif %}
+                                    <em>Description:</em> {{ match.job.description|truncatechars:300 }}
+                                    <div class="mt-2">
+                                        {% with match.job.title|add:match.job.company as job_id %}
+                                            {% if user.is_authenticated %}
+                                                {% if job_id not in bookmarked_job_ids %}
+                                                    <form method="post" action="{% url 'bookmark_job' %}" style="display:inline;">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="job_id" value="{{ job_id }}">
+                                                        <input type="hidden" name="job_title" value="{{ match.job.title }}">
+                                                        <input type="hidden" name="job_company" value="{{ match.job.company }}">
+                                                        <input type="hidden" name="job_description" value="{{ match.job.description }}">
+                                                        <button type="submit" class="btn btn-outline-primary btn-sm">Bookmark</button>
+                                                    </form>
+                                                {% else %}
+                                                    <form method="post" action="{% url 'unbookmark_job' %}" style="display:inline;">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="job_id" value="{{ job_id }}">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm">Unbookmark</button>
+                                                    </form>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li class="list-group-item">You have not uploaded any resumes yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %} 
