@@ -31,6 +31,7 @@ def home(request):
             resume = form.save(commit=False)
             if request.user.is_authenticated:
                 resume.user = request.user
+            resume.save()  # Save first, so file is written to disk and path is valid
             # Only parse if the file is a PDF
             if resume.file and resume.file.name.lower().endswith('.pdf'):
                 text = extract_pdf_text(resume.file.path)
@@ -38,7 +39,7 @@ def home(request):
                 # Extract skills
                 skills = extract_skills(text)
                 resume.skills = ", ".join(skills)
-            resume.save()
+                resume.save()  # Save again to update parsed_text and skills
             return redirect('home')
     else:
         form = ResumeForm()
@@ -124,10 +125,10 @@ def tfidf_match_jobs(resume_text, jobs, top_n=5):
     ranked_indices = cosine_sim.argsort()[::-1][:top_n]
     matches = []
     for idx in ranked_indices:
-        matches.append({
+            matches.append({
             'job': jobs[idx],
             'tfidf_score': round(float(cosine_sim[idx]), 3)
-        })
+            })
     return matches
 
 # Skill-overlap matching (as before)
