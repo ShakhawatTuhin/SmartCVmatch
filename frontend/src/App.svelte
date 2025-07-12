@@ -1,47 +1,71 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import Header from './components/Header.svelte';
+  import Home from './components/Home.svelte';
+  import JobFinder from './components/JobFinder.svelte';
+  import Applications from './components/Applications.svelte';
+  import Bookmarks from './components/Bookmarks.svelte';
+  import Profile from './components/Profile.svelte';
+  import Register from './components/Register.svelte';
+  import Login from './components/Login.svelte';
+
+  type Page = 'home' | 'jobs' | 'applications' | 'bookmarks' | 'profile' | 'register' | 'login';
+  let currentPage = $state<Page>('home');
+
+  function handleNavigation(event: CustomEvent<{ page: Page }>) {
+    currentPage = event.detail.page;
+  }
 </script>
 
-<main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
-</main>
+<div class="app">
+  <Header {currentPage} on:navigate={handleNavigation} />
+  
+  <main>
+    {#if currentPage === 'home'}
+      <Home on:navigate={handleNavigation} />
+    {:else if currentPage === 'jobs'}
+      <JobFinder />
+    {:else if currentPage === 'applications'}
+      <Applications />
+    {:else if currentPage === 'bookmarks'}
+      <Bookmarks />
+    {:else if currentPage === 'profile'}
+      <Profile />
+    {:else if currentPage === 'register'}
+      <Register on:navigate={handleNavigation} />
+    {:else if currentPage === 'login'}
+      <Login on:navigate={handleNavigation} />
+    {/if}
+  </main>
+</div>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  .app {
+    min-height: 100vh;
+    background-color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
+
+  main {
+    padding: 1rem;
+    flex: 1;
   }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
+
+  :global(body) {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #111827;
+    background: #f9fafb;
   }
-  .read-the-docs {
-    color: #888;
+
+  :global(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+
+  :global(button) {
+    font-family: inherit;
   }
 </style>

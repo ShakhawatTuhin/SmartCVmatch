@@ -16,14 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('resume_matcher.urls')),
-]
-
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('resume_matcher.urls')),  # Include resume_matcher URLs under /api/
+    path('', include('resume_matcher.urls')),  # Include non-API URLs at root
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

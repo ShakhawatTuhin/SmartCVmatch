@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=bk_!&!ktm0y#(^r1k56@79yr3svowksex@0v8u51y+g@%rxhr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -38,12 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'resume_matcher',
+    'rest_framework',
+    'corsheaders',
     'widget_tweaks',
+    'rest_framework.authtoken',  # Add token authentication
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -76,12 +80,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'smartcvmatch',
-        'USER': 'smartcvuser',
-        'PASSWORD': 'smartcvuserpass',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -128,3 +128,48 @@ LOGOUT_REDIRECT_URL = '/login/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev server
+    "http://localhost:4173",  # Vite preview
+    "http://127.0.0.1:5173",  # Using IP address
+    "http://127.0.0.1:4173",  # Using IP address
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False # Only allow specific origins
+
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:4173",
+]
+
+# Session settings - make more permissive for development
+CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = None
+CSRF_COOKIE_HTTPONLY = False  # False to allow JS access
+SESSION_COOKIE_HTTPONLY = True
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_NAME = 'csrftoken'
+
+# For development only
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # Token auth first
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    # For development, allow unauthenticated access but control in views
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
