@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<div class="container py-4">
+    <h2 class="mb-4">Your Dashboard</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <h4 class="mb-3">Your Uploaded Resumes & Matches</h4>
+            {% if resume_matches %}
+                {% for resume, matches in resume_matches %}
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Uploaded: {{ resume.uploaded_at|date:'M d, Y H:i' }}</h5>
+                            {% if resume.file %}
+                                <a href="{{ resume.file.url }}" target="_blank" class="btn btn-outline-secondary btn-sm mb-2">Download</a>
+                            {% endif %}
+                            {% if resume.skills %}
+                                <div class="mb-2">
+                                    <strong>Extracted Skills:</strong>
+                                    <span class="badge bg-info text-dark">{{ resume.skills }}</span>
+                                </div>
+                            {% endif %}
+                            {% if resume.parsed_text %}
+                                <div class="mb-2">
+                                    <strong>Extracted Text:</strong>
+                                    <pre class="bg-light p-2 rounded" style="white-space: pre-wrap; max-height: 200px; overflow-y: auto;">{{ resume.parsed_text|truncatechars:1000 }}</pre>
+                                </div>
+                            {% endif %}
+                            {% if matches %}
+                                <div class="mt-3">
+                                    <strong>Top Job Matches (TF-IDF + Skills):</strong>
+                                    <div class="row">
+                                        {% for match in matches %}
+                                            <div class="col-md-12 mb-2">
+                                                <div class="card border-primary">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title mb-1">{{ match.job.title }} <span class="text-muted">at {{ match.job.company }}</span></h6>
+                                                        <div class="mb-1">
+                                                            <span class="badge bg-primary">TF-IDF: {{ match.tfidf_score }}</span>
+                                                            <span class="badge bg-success">Skills: {{ match.skill_score }}</span>
+                                                            {% if match.matched_skills %}
+                                                                <span class="badge bg-warning text-dark">Matched: {{ match.matched_skills|join:", " }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                        <p class="card-text small">{{ match.job.description|truncatechars:300 }}</p>
+                                                        <div class="mt-2">
+                                                            {% with match.job.title|add:match.job.company as job_id %}
+                                                                {% if user.is_authenticated %}
+                                                                    {% if job_id not in bookmarked_job_ids %}
+                                                                        <form method="post" action="{% url 'bookmark_job' %}" style="display:inline;">
+                                                                            {% csrf_token %}
+                                                                            <input type="hidden" name="job_id" value="{{ job_id }}">
+                                                                            <input type="hidden" name="job_title" value="{{ match.job.title }}">
+                                                                            <input type="hidden" name="job_company" value="{{ match.job.company }}">
+                                                                            <input type="hidden" name="job_description" value="{{ match.job.description }}">
+                                                                            <button type="submit" class="btn btn-outline-primary btn-sm">Bookmark</button>
+                                                                        </form>
+                                                                    {% else %}
+                                                                        <form method="post" action="{% url 'unbookmark_job' %}" style="display:inline;">
+                                                                            {% csrf_token %}
+                                                                            <input type="hidden" name="job_id" value="{{ job_id }}">
+                                                                            <button type="submit" class="btn btn-outline-danger btn-sm">Unbookmark</button>
+                                                                        </form>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">You have not uploaded any resumes yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
