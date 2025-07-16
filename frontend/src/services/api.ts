@@ -1,6 +1,12 @@
 import type { User, Resume, Job, Bookmark, Application, JobMatch } from '../types/models';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Use the proxy in development, absolute URL in production
+const isProduction = import.meta.env.PROD;
+const API_BASE_URL = isProduction 
+  ? (import.meta.env['VITE_API_URL'] || 'https://smartcvmatch-backend.vercel.app/api')
+  : '/api'; // This will use the Vite proxy
+
+console.log('Using API URL:', API_BASE_URL);
 
 // Store auth token in localStorage
 let authToken: string | null = null;
@@ -78,14 +84,27 @@ export async function initializeAPI(): Promise<void> {
     console.log('Initializing API connection');
     const response = await fetch(`${API_BASE_URL}/`, {
       credentials: 'include',
-      headers: addAuthHeaders({
+      headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-      })
+      }
     });
     
-    const data = await response.json();
-    console.log('API initialization response:', data);
+    if (!response.ok) {
+      console.error(`API initialization failed with status: ${response.status}`);
+      return;
+    }
+    
+    try {
+      const data = await response.json();
+      console.log('API initialization response:', data);
+      
+      // Get CSRF token from cookies
+      const csrfToken = getCsrfToken();
+      console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
+    } catch (jsonError) {
+      console.error('Failed to parse API initialization response:', jsonError);
+    }
   } catch (error) {
     console.error('Failed to initialize API:', error);
   }
@@ -118,12 +137,19 @@ async function handleResponse<T>(response: Response): Promise<T> {
 export async function login(username: string, password: string): Promise<{ token: string }> {
   console.log('Logging in user:', username);
   try {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
+    }
+    
     const response = await fetch(`${API_BASE_URL}/users/login/`, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
+      headers: headers,
       body: JSON.stringify({ username, password }),
       credentials: 'include',
     });
@@ -179,12 +205,19 @@ export async function register(userData: {
     
     console.log('Sending registration data:', JSON.stringify(requestData));
     
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
+    }
+    
     const response = await fetch(`${API_BASE_URL}/users/register/`, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
+      headers: headers,
       body: JSON.stringify(requestData),
       credentials: 'include',
     });
@@ -193,28 +226,34 @@ export async function register(userData: {
       console.error('Registration failed with status:', response.status);
       let errorText = `HTTP error ${response.status}`;
       
-      try {
-        const errorData = await response.json();
-        console.error('Error data:', errorData);
-        errorText = JSON.stringify(errorData);
-      } catch (e) {
-        console.error('Failed to parse error response:', e);
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        try {
+          const errorData = await response.json();
+          console.error('Error data:', errorData);
+          errorText = JSON.stringify(errorData);
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+      } else {
+        const errorText = await response.text();
+        console.error('Error text:', errorText);
       }
       
       throw new Error(errorText);
     }
     
-    const userData = await response.json();
+    const data = await response.json();
+    console.log('Registration successful:', data);
     
     // Save the auth token
-    if (userData.token) {
-      setAuthToken(userData.token);
+    if (data && data.token) {
+      setAuthToken(data.token);
       console.log('Auth token saved after registration');
     } else {
       console.warn('No token received during registration');
     }
     
-    return userData;
+    return data;
   } catch (error) {
     console.error('Registration error:', error);
     throw error;
@@ -223,9 +262,16 @@ export async function register(userData: {
 
 export async function logout(): Promise<void> {
   try {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = addAuthHeaders();
+    
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
+    }
+    
     const response = await fetch(`${API_BASE_URL}/users/logout/`, {
       method: 'POST',
-      headers: addAuthHeaders(),
+      headers: headers,
       credentials: 'include',
     });
     
@@ -347,9 +393,17 @@ export async function uploadResume(file: File): Promise<Resume> {
     formData.append('file', file);
 
     console.log('Uploading resume with auth token');
+    
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = addAuthHeaders();
+    
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
+    }
+    
     const response = await fetch(`${API_BASE_URL}/resumes/`, {
       method: 'POST',
-      headers: addAuthHeaders(),
+      headers: headers,
       credentials: 'include',
       body: formData,
     });

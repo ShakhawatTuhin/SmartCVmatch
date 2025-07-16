@@ -18,7 +18,7 @@ SmartCVMatch is an intelligent resume matching application that helps job seeker
 - Python/Django
 - Django REST Framework
 - Natural Language Processing (NLTK)
-- SQLite database
+- SQLite database (local) / PostgreSQL (production)
 
 ### Frontend
 - Svelte
@@ -106,6 +106,20 @@ smartcvmatch/
       │   └── types/        # TypeScript type definitions
       └── public/           # Static assets
 ```
+
+## Deployment
+
+### Vercel Deployment (Recommended)
+For detailed instructions on deploying to Vercel, see [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md).
+
+Benefits of Vercel deployment:
+- No sleep time (always available for recruiters)
+- Fast global CDN
+- Easy setup and configuration
+- Automatic HTTPS
+
+### Alternative Deployment Options
+For other deployment options, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## License
 
