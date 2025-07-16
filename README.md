@@ -113,4 +113,4 @@ smartcvmatch/
 
 ## Contributors
 
-[Shakawat Hussen Tuhin] 
+Shakawat Hussen Tuhin
