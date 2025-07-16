@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { getProfile, logout } from '../services/api';
+  import { logout } from '../services/api';
 
   const dispatch = createEventDispatcher();
 
@@ -17,10 +17,23 @@
 
   async function checkAuth() {
     try {
-      const profile = await getProfile();
-      isAuthenticated = true;
-      userProfile = profile;
+      // Use direct fetch like in Home.svelte to ensure consistency
+      const response = await fetch('/api/users/profile/', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const profile = await response.json();
+        isAuthenticated = true;
+        userProfile = profile;
+        console.log('User authenticated in Header:', profile);
+      } else {
+        console.log('User not authenticated in Header, status:', response.status);
+        isAuthenticated = false;
+        userProfile = null;
+      }
     } catch (e) {
+      console.error('Auth check error in Header:', e);
       isAuthenticated = false;
       userProfile = null;
     }

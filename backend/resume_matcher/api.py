@@ -25,17 +25,27 @@ logger = logging.getLogger(__name__)
 @ensure_csrf_cookie
 def api_root(request):
     """Root endpoint that sets CSRF cookie for the frontend"""
-    return Response({
-        "message": "API is working", 
-        "authenticated": request.user.is_authenticated,
-        "endpoints": {
-            "login": "/api/users/login/",
-            "register": "/api/users/register/",
-            "profile": "/api/users/profile/",
-            "resumes": "/api/resumes/",
-            "bookmarks": "/api/bookmarks/",
-        }
-    })
+    try:
+        return Response({
+            "message": "API is working", 
+            "authenticated": request.user.is_authenticated,
+            "endpoints": {
+                "login": "/api/users/login/",
+                "register": "/api/users/register/",
+                "profile": "/api/users/profile/",
+                "resumes": "/api/resumes/",
+                "bookmarks": "/api/bookmarks/",
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error in api_root: {str(e)}")
+        return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """Simple health check endpoint to verify the API is working"""
+    return Response({"status": "ok"}, status=status.HTTP_200_OK)
 
 class UserViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])

@@ -14,6 +14,7 @@ router.register(r'jobs', api.JobViewSet, basename='job')  # Register the new Job
 # API URLs - these will be included under /api/
 api_urlpatterns = [
     path('', api.api_root),  # Root API endpoint
+    path('health/', api.health_check, name='health-check'),  # Health check endpoint
     path('', include(router.urls)),
 ]
 

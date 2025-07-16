@@ -28,7 +28,7 @@
   async function checkAuth() {
     try {
       // Use the API function rather than direct fetch
-      const response = await fetch('http://127.0.0.1:8000/api/users/profile/', {
+      const response = await fetch('/api/users/profile/', {
         credentials: 'include'
       });
       
@@ -54,6 +54,9 @@
       isAuthenticated = true;
       username = '';
       password = '';
+      
+      // Navigate to jobs page after successful login
+      dispatch('navigate', { page: 'jobs' });
     } catch (e) {
       error = e instanceof Error ? e.message : 'Login failed';
     } finally {
