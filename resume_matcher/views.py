@@ -46,27 +46,14 @@ def home(request):
 
     if request.user.is_authenticated:
         resumes = Resume.objects.filter(user=request.user).order_by('-uploaded_at')
-        # Get bookmarked job IDs for the user
-        bookmarked_job_ids = set(
-            Bookmark.objects.filter(user=request.user).values_list('job_id', flat=True)
-        )
     else:
         resumes = Resume.objects.none()  # or [] for an empty queryset
-        bookmarked_job_ids = set()
 
     resume_matches = []
     for resume in resumes:
         matches = combined_match_jobs(resume, jobs)
-        # Add job_id to each match for consistent comparison
-        for match in matches:
-            match['job_id'] = match['job']['title'] + match['job']['company']
         resume_matches.append((resume, matches))
-    
-    return render(request, 'home.html', {
-        'form': form, 
-        'resume_matches': resume_matches,
-        'bookmarked_job_ids': bookmarked_job_ids
-    })
+    return render(request, 'home.html', {'form': form, 'resume_matches': resume_matches})
 
 
 from pdfminer.high_level import extract_text
