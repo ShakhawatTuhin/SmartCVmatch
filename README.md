@@ -12,6 +12,12 @@ SmartCVMatch is an intelligent resume matching application that helps job seeker
 - Application tracking
 - Statistics and insights on job matches
 
+##
+![screenshot 1](assets/1.png)
+![screenshot 2](assets/2.png)
+![screenshot 3](assets/3.png)
+
+
 ## Tech Stack
 
 ### Backend
