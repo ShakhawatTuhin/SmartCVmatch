@@ -1,14 +1,15 @@
-Django==5.0.2
+Django==5.2.3
 djangorestframework==3.14.0
-django-cors-headers==4.3.1
+django-cors-headers==4.3.0
+whitenoise==6.6.0
+dj-database-url==2.1.0
 django-widget-tweaks==1.5.0
+psycopg2-binary==2.9.9
+gunicorn==21.2.0
 pdfminer.six==20231228
 spacy==3.7.2
 scikit-learn==1.4.0
 numpy==1.26.4
 pandas==2.2.0
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
-gunicorn==21.2.0
-whitenoise==6.6.0
-dj-database-url==2.1.0
-psycopg2-binary==2.9.9 
+blis==0.7.9
