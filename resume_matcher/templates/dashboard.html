@@ -44,26 +44,24 @@
                                                         </div>
                                                         <p class="card-text small">{{ match.job.description|truncatechars:300 }}</p>
                                                         <div class="mt-2">
-                                                            {% with match.job.title|add:match.job.company as job_id %}
-                                                                {% if user.is_authenticated %}
-                                                                    {% if job_id not in bookmarked_job_ids %}
-                                                                        <form method="post" action="{% url 'bookmark_job' %}" style="display:inline;">
-                                                                            {% csrf_token %}
-                                                                            <input type="hidden" name="job_id" value="{{ job_id }}">
-                                                                            <input type="hidden" name="job_title" value="{{ match.job.title }}">
-                                                                            <input type="hidden" name="job_company" value="{{ match.job.company }}">
-                                                                            <input type="hidden" name="job_description" value="{{ match.job.description }}">
-                                                                            <button type="submit" class="btn btn-outline-primary btn-sm">Bookmark</button>
-                                                                        </form>
-                                                                    {% else %}
-                                                                        <form method="post" action="{% url 'unbookmark_job' %}" style="display:inline;">
-                                                                            {% csrf_token %}
-                                                                            <input type="hidden" name="job_id" value="{{ job_id }}">
-                                                                            <button type="submit" class="btn btn-outline-danger btn-sm">Unbookmark</button>
-                                                                        </form>
-                                                                    {% endif %}
+                                                            {% if user.is_authenticated %}
+                                                                {% if match.job_id not in bookmarked_job_ids %}
+                                                                    <form method="post" action="{% url 'bookmark_job' %}" style="display:inline;">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="job_id" value="{{ match.job_id }}">
+                                                                        <input type="hidden" name="job_title" value="{{ match.job.title }}">
+                                                                        <input type="hidden" name="job_company" value="{{ match.job.company }}">
+                                                                        <input type="hidden" name="job_description" value="{{ match.job.description }}">
+                                                                        <button type="submit" class="btn btn-outline-primary btn-sm">Bookmark</button>
+                                                                    </form>
+                                                                {% else %}
+                                                                    <form method="post" action="{% url 'unbookmark_job' %}" style="display:inline;">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="job_id" value="{{ match.job_id }}">
+                                                                        <button type="submit" class="btn btn-outline-danger btn-sm">Unbookmark</button>
+                                                                    </form>
                                                                 {% endif %}
-                                                            {% endwith %}
+                                                            {% endif %}
                                                         </div>
                                                     </div>
                                                 </div>

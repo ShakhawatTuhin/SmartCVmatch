@@ -1,0 +1,46 @@
+# Logs and debug files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node packages (if mixed project)
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Python-related
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.egg-info/
+env/
+venv/
+.venv/
+
+# OS / IDE / Editor
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Git
+.git/
+.gitignore
+
+# Frontend (if separate)
+frontend/
+build/
